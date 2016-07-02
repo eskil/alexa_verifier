@@ -69,12 +69,26 @@ If the URL does not pass these tests, reject the request and do not proceed with
 ## TODO
 
 - [ ] Add better parsing of the cert info such as the issuer and subject.
-- [ ] All certificates in the chain combine to create a chain of trust to a trusted root CA certificate
 - [x] Once you have determined that the signing certificate is valid, extract the public key from it.
 - [x] Base64-decode the Signature header value on the request to obtain the encrypted signature.
-- [ ] Use the public key extracted from the signing certificate to decrypt the encrypted signature to produce the asserted hash value.
-- [ ] Generate a SHA-1 hash value from the full HTTPS request body to produce the derived hash value
-- [ ] Compare the asserted hash value and derived hash values to ensure that they match.
+- [x] Use the public key extracted from the signing certificate to decrypt the encrypted signature to produce the asserted hash value.
+- [x] Generate a SHA-1 hash value from the full HTTPS request body to produce the derived hash value
+- [x] Compare the asserted hash value and derived hash values to ensure that they match.
+
+## OpenSSL Notes
+
+**Generate certificate for testing**
+`openssl req -x509 -newkey rsa:4096 -keyout test/data/key.pem -out test/data/cert.pem -days 2000 -nodes`
+
+**Create signature**
+(request -> hash)
+`cat test/data/request.json | openssl sha1 > test/data/request_hash`
+(hash -> encrypt -> base64 encode)
+`cat test/data/request_hash | openssl rsautl -sign -inkey test/data/key.pem | openssl base64 -out test/data/request_hash.sign`
+
+**Verify signature**
+(base64 decode -> decrypt -> compare with request hash)
+`cat test/data/request_hash.sign | openssl base64 -d | openssl rsautl -verify -inkey test/data/cert.pem -certin`
 
 ## Installation
 

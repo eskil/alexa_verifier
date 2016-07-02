@@ -1,33 +1,15 @@
 defmodule AlexaVerifier do
   use Timex
 
-  def verify(signature, url \\ "https://s3.amazonaws.com/echo.api/../echo.api/echo-api-cert.pem") do
-    url = normalize(url)
-    case verify_uri(url) do
-      false -> false
-      true ->
-        cert = url |> get_cert
-        cert_info = cert |> get_cert_info
-        IO.puts inspect(cert_info)
-        case verify_cert_dates(cert_info)
-             and verify_cert_subject(cert_info)
-             and verify_cert(cert, signature) do
-          true -> true
-          false -> false
-        end
-    end
-  end
-
-  def verify_cert(cert, signature) do
-    case Base.decode64(signature) do
-      :error -> false
-      {:ok, signature} -> true
-    end
+  def start_link do
+    AlexaVerifier.CertCache.start_link
   end
 
   def verify_cert_dates(%{"notBefore" => not_before, "notAfter" => not_after}) do
-    {:ok, not_before} = Timex.parse(not_before, "%b %d %H:%M:%S %Y GMT", :strftime)
-    {:ok, not_after} = Timex.parse(not_after, "%b %d %H:%M:%S %Y GMT", :strftime)
+    {:ok, not_before} = Timex.parse(not_before, "%b %e %H:%M:%S %Y GMT", :strftime)
+    {:ok, not_after} = Timex.parse(not_after, "%b %e %H:%M:%S %Y GMT", :strftime)
+    # TODO: temporary. Remove soon!
+    not_before = Timex.shift(not_before, days: -1)
     Timex.between?(DateTime.today, not_before, not_after)
   end
 
@@ -37,7 +19,7 @@ defmodule AlexaVerifier do
   def verify_cert_subject(_), do: false
 
   def verify_uri(url) when is_binary(url), do: verify_uri(URI.parse(url))
-  def verify_uri(%{scheme: "https", host: "s3.amazonaws.com", path: "/echo.api/"<>_, port: 443} = uri), do: true
+  def verify_uri(%{scheme: "https", host: "s3.amazonaws.com", path: "/echo.api/"<>_, port: 443}), do: true
   def verify_uri(_), do: false
 
   def normalize(url) do
@@ -46,19 +28,18 @@ defmodule AlexaVerifier do
     |> URI.to_string
   end
 
-  def get_cert(url) do
-    %HTTPoison.Response{body: certs} = HTTPoison.get!(url)
-    certs
-  end
-
   def get_cert_info(cert) do
     %{out: result} = Porcelain.exec("openssl", ["x509", "-noout", "-issuer", "-subject", "-dates"], in: cert)
     parse_cert_info(result)
   end
 
-  def get_public_key(cert) do
-    %{out: result} = Porcelain.exec("openssl", ["x509", "-noout", "-pubkey"], in: cert)
-    result
+  def decrypt_signature(signature, cert) do
+    # TODO: find a way to do this without having to write to file first!
+    signature = Base.decode64!(signature, ignore: :whitespace)
+    File.write!("/tmp/tmp_signature", signature)
+    File.write!("/tmp/tmp_cert.pem", cert)
+    %{out: result} = Porcelain.exec("openssl", ["rsautl", "-verify", "-inkey", "/tmp/tmp_cert.pem", "-certin", "-in", "/tmp/tmp_signature"])
+    String.trim(result)
   end
 
   def parse_cert_info(cert_info) do

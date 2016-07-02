@@ -1,0 +1,22 @@
+{
+  "session": {
+    "new": false,
+    "sessionId": "session1234",
+    "attributes": {},
+    "user": {
+      "userId": "123456",
+      "accessToken": "gSmwKsnaCyolfYkPcvwtH58LGGVJj0E1B9urL4E9"
+    },
+    "application": {
+      "applicationId": "ExampleSkill"
+    }
+  },
+  "version": "1.0",
+  "request": {
+    "intent": {
+      "name": "SampleIntent"
+    },
+    "type": "IntentRequest",
+    "requestId": "request5678"
+  }
+}

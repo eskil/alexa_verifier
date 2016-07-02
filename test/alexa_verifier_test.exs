@@ -46,18 +46,10 @@ defmodule AlexaVerifierTest do
   test "verify_cert_subject when subject missing" do
     cert_info = %{}
     assert false == AlexaVerifier.verify_cert_subject(cert_info)
-  end
-
-  test "verify_cert with valid signature" do
-    assert AlexaVerifier.verify_cert("", "YWJjZGVmZ2hpamtsbW5vcA==")
-  end
-
-  test "verify_cert with invalid signature" do
-    assert false == AlexaVerifier.verify_cert("", "not-valid-Base64")
-  end
+  end  
 
   test "get_cert_info" do
-    {:ok, cert} = File.read("test/echo-api-cert.pem")
+    {:ok, cert} = File.read("test/data/echo-api-cert.pem")
     result = AlexaVerifier.get_cert_info(cert)
     assert result["issuer"] == " /C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=Terms of use at https://www.verisign.com/rpa (c)10/CN=VeriSign Class 3 Secure Server CA - G3"
     assert result["subject"] == " /C=US/ST=Washington/L=Seattle/O=Amazon.com, Inc./CN=echo-api.amazon.com"
@@ -65,10 +57,11 @@ defmodule AlexaVerifierTest do
     assert result["notBefore"] == "Jan 31 00:00:00 2015 GMT"
   end
 
-  test "get_public_key" do
-    {:ok, cert} = File.read("test/echo-api-cert.pem")
-    {:ok, expected_key} = File.read("test/echo-api-public-key.pem")
-    assert expected_key == AlexaVerifier.get_public_key(cert)
+  test "decrypt_signature" do
+    {:ok, cert} = File.read("test/data/cert.pem")
+    {:ok, signature} = File.read("test/data/request_hash.sign")
+    {:ok, expected_output} = File.read("test/data/request_hash")
+    assert String.trim(expected_output) == AlexaVerifier.decrypt_signature(signature, cert)
   end
 
 end
