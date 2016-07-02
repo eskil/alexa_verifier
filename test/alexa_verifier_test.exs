@@ -56,4 +56,19 @@ defmodule AlexaVerifierTest do
     assert false == AlexaVerifier.verify_cert("", "not-valid-Base64")
   end
 
+  test "get_cert_info" do
+    {:ok, cert} = File.read("test/echo-api-cert.pem")
+    result = AlexaVerifier.get_cert_info(cert)
+    assert result["issuer"] == " /C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=Terms of use at https://www.verisign.com/rpa (c)10/CN=VeriSign Class 3 Secure Server CA - G3"
+    assert result["subject"] == " /C=US/ST=Washington/L=Seattle/O=Amazon.com, Inc./CN=echo-api.amazon.com"
+    assert result["notAfter"] == "Oct 31 23:59:59 2015 GMT"
+    assert result["notBefore"] == "Jan 31 00:00:00 2015 GMT"
+  end
+
+  test "get_public_key" do
+    {:ok, cert} = File.read("test/echo-api-cert.pem")
+    {:ok, expected_key} = File.read("test/echo-api-public-key.pem")
+    assert expected_key == AlexaVerifier.get_public_key(cert)
+  end
+
 end

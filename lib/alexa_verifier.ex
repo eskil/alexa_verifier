@@ -56,6 +56,11 @@ defmodule AlexaVerifier do
     parse_cert_info(result)
   end
 
+  def get_public_key(cert) do
+    %{out: result} = Porcelain.exec("openssl", ["x509", "-noout", "-pubkey"], in: cert)
+    result
+  end
+
   def parse_cert_info(cert_info) do
     cert_info
       |> String.split("\n", trim: true)

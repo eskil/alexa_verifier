@@ -70,7 +70,7 @@ If the URL does not pass these tests, reject the request and do not proceed with
 
 - [ ] Add better parsing of the cert info such as the issuer and subject.
 - [ ] All certificates in the chain combine to create a chain of trust to a trusted root CA certificate
-- [ ] Once you have determined that the signing certificate is valid, extract the public key from it.
+- [x] Once you have determined that the signing certificate is valid, extract the public key from it.
 - [x] Base64-decode the Signature header value on the request to obtain the encrypted signature.
 - [ ] Use the public key extracted from the signing certificate to decrypt the encrypted signature to produce the asserted hash value.
 - [ ] Generate a SHA-1 hash value from the full HTTPS request body to produce the derived hash value
