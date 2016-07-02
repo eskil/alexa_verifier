@@ -1,17 +1,27 @@
 defmodule AlexaVerifier do
   use Timex
 
-  def verify(url \\ "https://s3.amazonaws.com/echo.api/../echo.api/echo-api-cert.pem") do
+  def verify(signature, url \\ "https://s3.amazonaws.com/echo.api/../echo.api/echo-api-cert.pem") do
     url = normalize(url)
     case verify_uri(url) do
       false -> false
       true ->
-        cert_info = url |> get_cert |> get_cert_info
+        cert = url |> get_cert
+        cert_info = cert |> get_cert_info
         IO.puts inspect(cert_info)
-        case verify_cert_dates(cert_info) and verify_cert_subject(cert_info) do
+        case verify_cert_dates(cert_info)
+             and verify_cert_subject(cert_info)
+             and verify_cert(cert, signature) do
           true -> true
           false -> false
         end
+    end
+  end
+
+  def verify_cert(cert, signature) do
+    case Base.decode64(signature) do
+      :error -> false
+      {:ok, signature} -> true
     end
   end
 

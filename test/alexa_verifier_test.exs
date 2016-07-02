@@ -48,4 +48,12 @@ defmodule AlexaVerifierTest do
     assert false == AlexaVerifier.verify_cert_subject(cert_info)
   end
 
+  test "verify_cert with valid signature" do
+    assert AlexaVerifier.verify_cert("", "YWJjZGVmZ2hpamtsbW5vcA==")
+  end
+
+  test "verify_cert with invalid signature" do
+    assert false == AlexaVerifier.verify_cert("", "not-valid-Base64")
+  end
+
 end
