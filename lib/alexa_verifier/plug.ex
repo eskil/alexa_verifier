@@ -1,6 +1,7 @@
 defmodule AlexaVerifier.Plug do
   use Plug.Builder
   import AlexaVerifier
+  require Logger
 
   @certificate_url_header "signaturecertchainurl"
   @signature_header "signature"
@@ -12,24 +13,29 @@ defmodule AlexaVerifier.Plug do
 
   def verify_cert_url(conn, _) do
     cert_url = certificate_url(conn)
+    Logger.debug("Cert URL: #{cert_url}")
     case verify_uri(cert_url) do
       true -> conn
       false ->
+        Logger.info("Invalid Alexa Signature URL")
         conn |> send_resp(400, "Invalid Alexa Signature URL") |> halt
     end
   end
 
   def get_cert(conn, _) do
     cert = AlexaVerifier.CertCache.get(certificate_url(conn))
+    Logger.debug("Cert: #{cert}")
     put_private(conn, :alexa_verifier_cert, cert)
   end
 
   def verify_certificate(conn, _) do
     cert = conn.private[:alexa_verifier_cert]
     cert_info = get_cert_info(cert)
+    Logger.debug("Cert Info: #{inspect(cert_info)}")
     case verify_cert_dates(cert_info) and verify_cert_subject(cert_info) do
       true -> conn
       false ->
+        Logger.info("Invalid Alexa Signature Certificate")
         conn |> send_resp(400, "Invalid Alexa Signature Certificate") |> halt
     end
   end
@@ -37,9 +43,11 @@ defmodule AlexaVerifier.Plug do
   def verify_request(conn, _) do
     cert = conn.private[:alexa_verifier_cert]
     signature_hash = signature(conn) |> decrypt_signature(cert)
+    Logger.debug("Signature Hash: #{signature_hash}")
     case signature_hash == request_hash(conn) do
       true -> conn
       false ->
+        Logger.info("Invalid Alexa Signature")
         conn |> send_resp(400, "Invalid Alexa Signature") |> halt
     end
   end
