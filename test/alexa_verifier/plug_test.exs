@@ -20,6 +20,14 @@ defmodule AlexaVerifier.PlugTest do
       |> put_req_header(@signature_header, @valid_signature)
   end
 
+  test "returns error when certificate url is blank" do
+    conn = conn(:post, "https://www.example.com/command", @request_body)
+    conn = AlexaVerifier.Plug.call(conn, @opts)
+    assert conn.status == 400
+    assert conn.resp_body == "Invalid Alexa Signature URL"
+    assert conn.halted
+  end
+
   # Test plug :verify_url
 
   test "does nothing when url is valid" do
