@@ -42,9 +42,12 @@ defmodule AlexaVerifier.Plug do
 
   def verify_request(conn, _) do
     cert = conn.private[:alexa_verifier_cert]
+    Logger.debug("Signature Header: #{signature(conn)}")
     signature_hash = signature(conn) |> decrypt_signature(cert)
     Logger.debug("Signature Hash: #{signature_hash}")
-    case signature_hash == request_hash(conn) do
+    hash = request_hash(conn)
+    Logger.debug("Request Hash: #{hash}")
+    case signature_hash == hash do
       true -> conn
       false ->
         Logger.info("Invalid Alexa Signature")
@@ -71,9 +74,9 @@ defmodule AlexaVerifier.Plug do
   end
 
   defp request_hash(conn) do
-    request_body(conn)
-      |> sha1
-      |> Base.encode16(case: :lower)
+    raw_body = request_body(conn)
+    Logger.debug("Raw Request Body: #{raw_body}")
+    sha1(raw_body) |> Base.encode16(case: :lower)
   end
 
   defp sha1(data) do

@@ -18,8 +18,7 @@ use Mix.Config
 #
 # Or configure a 3rd-party app:
 #
-#     config :logger, level: :info
-#
+config :logger, level: :info
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
