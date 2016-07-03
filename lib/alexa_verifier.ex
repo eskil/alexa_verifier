@@ -5,6 +5,10 @@ defmodule AlexaVerifier do
     AlexaVerifier.CertCache.start_link
   end
 
+  def start(:normal, []) do
+    AlexaVerifier.CertCache.start_link
+  end
+
   def verify_cert_dates(%{"notBefore" => not_before, "notAfter" => not_after}) do
     {:ok, not_before} = Timex.parse(not_before, "%b %e %H:%M:%S %Y GMT", :strftime)
     {:ok, not_after} = Timex.parse(not_after, "%b %e %H:%M:%S %Y GMT", :strftime)
