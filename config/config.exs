@@ -22,7 +22,7 @@ config :logger, level: :info
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
-config :alexa_verifier, verifier_service_url: "localhost:5000"
+config :alexa_verifier, verifier_service_url: "http://localhost:5000"
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment

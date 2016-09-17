@@ -2,7 +2,9 @@ defmodule AlexaVerifier.VerifierClient do
   use HTTPoison.Base
 
   defp process_url(url) do
-    Application.get_env(:alexa_verifier, :verifier_service_url) <> url
+    result = Application.get_env(:alexa_verifier, :verifier_service_url) <> url
+    IO.puts "Verifier URL = #{result}"
+    result
   end
 
   def verify(_, nil, nil) do
@@ -15,10 +17,14 @@ defmodule AlexaVerifier.VerifierClient do
       {"signaturecertchainurl", cert_url},
       {"signature", signature}
     ]
-    case RiverPlace.post!("/verify", request_body, headers) do
-      %{body: "success"} ->
+    IO.puts "Sending verification request..."
+    case AlexaVerifier.VerifierClient.post!("/verify", request_body, headers) do
+      %{status_code: 200} ->
+        IO.puts "Verification successful"
         :ok
-      _ ->
+      response ->
+        IO.puts "Verification failed"
+        IO.puts "Response = #{inspect(response)}"
         :error
     end
   end
