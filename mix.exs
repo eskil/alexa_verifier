@@ -21,13 +21,12 @@ defmodule AlexaVerifier.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :porcelain, :httpoison, :timex]]
+    [applications: [:logger, :porcelain, :httpoison]]
   end
 
   defp deps do
     [{:porcelain, "~> 2.0"},
      {:httpoison, "~> 0.9.0"},
-     {:timex, "~> 2.2.1"},
      {:plug, "~> 1.1.6"}]
   end
 end
