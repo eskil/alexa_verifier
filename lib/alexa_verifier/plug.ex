@@ -4,6 +4,7 @@ defmodule AlexaVerifier.Plug do
 
   @certificate_url_header "signaturecertchainurl"
   @signature_header "signature"
+  @verifier_client Application.get_env(:alexa_verifier, :verifier_client)
 
   plug :verify_request
 
@@ -26,7 +27,7 @@ defmodule AlexaVerifier.Plug do
   end
 
   def verify_request(conn, _) do
-    case AlexaVerifier.VerifierClient.verify(request_body(conn), signature(conn), certificate_url(conn)) do
+    case @verifier_client.verify(request_body(conn), signature(conn), certificate_url(conn)) do
       :ok -> conn
       :error -> conn |> send_resp(400, "Invalid Alexa Signature") |> halt
     end
