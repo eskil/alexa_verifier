@@ -3,7 +3,7 @@ defmodule AlexaVerifier.Mixfile do
 
   def project do
     [app: :alexa_verifier,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -26,7 +26,7 @@ defmodule AlexaVerifier.Mixfile do
 
   defp deps do
     [{:porcelain, "~> 2.0"},
-     {:httpoison, "~> 0.9.0"},
-     {:plug, "~> 1.1.6"}]
+     {:httpoison, "~> 1.0"},
+     {:plug, "~> 1.4"}]
   end
 end
